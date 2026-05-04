@@ -1,5 +1,4 @@
-# Implementation of DetectGPT in Pytorch could be found here: https://github.com/BurhanUlTayyab/DetectGPT
-[![Follow on Twitter](https://img.shields.io/twitter/follow/BurhanUlT?style=social)](https://x.com/BurhanUlT)
+# Check out our new project: Faz, a safety layer between AI agents and databases: https://github.com/fazhq/faz
 
 # GPTZero
 
