@@ -67,17 +67,8 @@ class GPT2PPL:
         for i, line in enumerate(lines):
             if re.search("[a-zA-Z0-9]+", line) == None:
                 continue
-            if len(offset) > 0:
-                line = offset + line
-                offset = ""
-            # remove the new line pr space in the first sentence if exists
-            if line[0] == "\n" or line[0] == " ":
-                line = line[1:]
-            if line[-1] == "\n" or line[-1] == " ":
-                line = line[:-1]
-            elif line[-1] == "[" or line[-1] == "(":
-                offset = line[-1]
-                line = line[:-1]
+            # remove leading/trailing whitespace
+            line = line.strip()
             ppl = self.getPPL(line)
             Perplexity_per_line.append(ppl)
 
