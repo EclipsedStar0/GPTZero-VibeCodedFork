@@ -54,8 +54,15 @@ class GPT2PPL:
         total_valid_char = re.findall("[a-zA-Z0-9]+", sentence)
         total_valid_char = sum([len(x) for x in total_valid_char]) # finds len of all the valid characters a sentence
 
-        if total_valid_char < 100:
-            return {"status": "Please input more text (min 100 characters)"}, "Please input more text (min 100 characters)"
+        MINIMUM_TOKENS = 32
+        CHAR_TO_TOKEN_RATIO = 0.3
+        
+        # Because any half-way decent Byte-Pair Encoding Tokenizer is going to compress text to at least this much, if not a bit more.
+        fake_token_count = total_valid_char * CHAR_TO_TOKEN_RATIO 
+        
+        # Change the limit to be at least 32 'tokens' to keep with the prior limit
+        if fake_token_count < MINIMUM_TOKENS:
+            return {"status": f"Please input more text (min {MINIMUM_TOKENS} tokens, current: {int(fake_token_count)})"}, f"Please input more text (min {MINIMUM_TOKENS} tokens, current: {int(fake_token_count)})"
         
         lines = nltk.sent_tokenize(sentence)
         lines = [line.strip() for line in lines if line.strip()]
