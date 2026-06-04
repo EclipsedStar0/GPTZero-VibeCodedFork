@@ -9,6 +9,7 @@ by Burhan Ul tayyab and Nicholas Chua
 
 import torch
 import re
+import nltk
 from transformers import GPT2LMHeadModel, GPT2TokenizerFast
 from collections import OrderedDict
 
@@ -54,8 +55,8 @@ class GPT2PPL:
         if total_valid_char < 100:
             return {"status": "Please input more text (min 100 characters)"}, "Please input more text (min 100 characters)"
         
-        lines = re.split(r'(?<=[.?!][ \[\(])|(?<=\n)\s*',sentence)
-        lines = list(filter(lambda x: (x is not None) and (len(x) > 0), lines))
+        lines = nltk.sent_tokenize(sentence)
+        lines = [line.strip() for line in lines if line.strip()]
 
         ppl = self.getPPL(sentence)
         print(f"Perplexity {ppl}")
