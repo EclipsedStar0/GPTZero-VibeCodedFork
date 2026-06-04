@@ -8,10 +8,11 @@ by Burhan Ul tayyab and Nicholas Chua
 """
 
 from model import GPT2PPL
+from typing import Tuple, Dict, Union
 
 # initialize the model
-model = GPT2PPL()
+model: GPT2PPL = GPT2PPL()
 
-sentence = "your text here"
+sentence: str = "your text here"
 
-model(sentence)
+result: Tuple[Dict[str, Union[float, int]], str] = model(sentence)

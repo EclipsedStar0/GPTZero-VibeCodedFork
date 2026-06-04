@@ -7,33 +7,33 @@ Both this code and the orignal code are published under the MIT license.
 by Burhan Ul tayyab and Nicholas Chua
 """
 
+from typing import Optional, Tuple, Any
 from torch import equal
 from model import GPT2PPL
-from fastapi import FastAPI, Form
-from fastapi import Request
+from fastapi import FastAPI, Form, Request
 import gradio as gr
 import uvicorn
 from database import DB
 from HTML_MD_Components import noticeBoardMarkDown, bannerHTML, emailHTML, discordHTML
 
-CUSTOM_PATH = "/"
+CUSTOM_PATH: str = "/"
 
-app = FastAPI()
+app: FastAPI = FastAPI()
 
 # initialize the model
-model = GPT2PPL()
-database  = DB()
+model: GPT2PPL = GPT2PPL()
+database: DB = DB()
 
 @app.post("/postdb")
-def uploadDataBase(email: str = Form(), request: Request = None):
+def uploadDataBase(email: str = Form(), request: Request = None) -> str:
     database.set(request.client.host, email)
     return "Email Sent"
 
-def inference(sentence: str):
+def inference(sentence: str) -> Any:
     return model(sentence=sentence)
 
 @app.get("/infer")
-def infer(sentence: str):
+def infer(sentence: str) -> Any:
     return model(sentence=sentence)
 
 with gr.Blocks(title="SG-GPTZero") as io:
@@ -50,11 +50,11 @@ with gr.Blocks(title="SG-GPTZero") as io:
         gr.Markdown("Use SG-GPTZero to determine if the text is written by AI or Human.")
     with gr.Row(elem_id="row1"):
         with gr.Column(scale=1):
-            InputTextBox = gr.Textbox(lines=7, placeholder="Please Insert your text(s) here", label="Texts")
-            sumbit_btn = gr.Button("Submit", elem_id="submit")
+            InputTextBox: gr.Textbox = gr.Textbox(lines=7, placeholder="Please Insert your text(s) here", label="Texts")
+            sumbit_btn: gr.Button = gr.Button("Submit", elem_id="submit")
         with gr.Column(scale=1):
-            OutputLabels = gr.JSON(label="Output")
-            OutputTextBox = gr.Textbox(show_label=False)
+            OutputLabels: gr.JSON = gr.JSON(label="Output")
+            OutputTextBox: gr.Textbox = gr.Textbox(show_label=False)
         sumbit_btn.click(inference, inputs=InputTextBox, outputs=[OutputLabels, OutputTextBox], api_name="infer")
     with gr.Row():
         with gr.Column():
@@ -63,7 +63,7 @@ with gr.Blocks(title="SG-GPTZero") as io:
         gr.Markdown('# <span style="color:#006400">Register</span> here for updates.')
     with gr.Row():
         with gr.Column(scale=0.5):
-            emailTextBox = gr.HTML(emailHTML)
+            emailTextBox: gr.HTML = gr.HTML(emailHTML)
         with gr.Column(scale=0.5):
             pass
  

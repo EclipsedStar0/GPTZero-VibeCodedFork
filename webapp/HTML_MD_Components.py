@@ -1,11 +1,11 @@
-def noticeBoardMarkDown():
+def noticeBoardMarkDown() -> str:
     return """
     # NoticeBoard
     We are currently working hard to develop SG-GPTZero version 2. Stay tuned for more updates. <br>
     <sub>27-Jan-2022</sub>
     """
 
-def discordHTML():
+def discordHTML() -> str:
     return """
     <a href="https://discord.com/invite/F3kFan28vH">
     <button style="border-radius: 5px;font-size: 16px;color: #FFFFFF;background-color: #7289DA;text-align:center;padding:0.5em;item-align:center;">
@@ -17,12 +17,12 @@ def discordHTML():
     </a>
     """
 
-def bannerHTML():
+def bannerHTML() -> str:
     return """
 <h4 style="text-align:center;border-radius: 25px;color:#FFFFFF;font-size:1.5em;padding:10px;background-image: linear-gradient(90deg, #20B2AA, #FFEBCD);border-style : solid; border-color : white; border-width: 1px">SG-GPTZero is now at beta version. Please give us feedback for further improvement.</h4>
     """
     
-def emailHTML():
+def emailHTML() -> str:
     return """
     <form action="/postdb" method="post" id="formPost">
         <input data-testid="textbox" name="email" type="email" class="scroll-hide block gr-box gr-input w-full gr-text-input" placeholder="Enter your email" autocomplete="email">
