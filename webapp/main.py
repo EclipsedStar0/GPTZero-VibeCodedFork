@@ -36,7 +36,7 @@ def inference(sentence: str):
 def infer(sentence: str):
     return model(sentence=sentence)
 
-with gr.Blocks(title="SG-GPTZero", css="#discord {text-align: center} #submit {background-color: #FF8C00} #advertisment {text-align: center;} #email {height:120%; background-color: LightSeaGreen} #blank {margin:150px} #code_feedback { margin-left:-0.3em;color:gray;text-align: center;margin-bottom:-100%;padding-bottom:-100%}") as io:
+with gr.Blocks(title="SG-GPTZero") as io:
     with gr.Row():
          gr.HTML(bannerHTML, visible=True)
     with gr.Row():
@@ -57,7 +57,7 @@ with gr.Blocks(title="SG-GPTZero", css="#discord {text-align: center} #submit {b
             OutputTextBox = gr.Textbox(show_label=False)
         sumbit_btn.click(inference, inputs=InputTextBox, outputs=[OutputLabels, OutputTextBox], api_name="infer")
     with gr.Row():
-        with gr.Box():
+        with gr.Column():
             gr.Markdown(noticeBoardMarkDown(), visible=True)
     with gr.Row():
         gr.Markdown('# <span style="color:#006400">Register</span> here for updates.')
