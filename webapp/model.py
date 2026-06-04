@@ -14,7 +14,9 @@ from collections import OrderedDict
 
 
 class GPT2PPL:
-    def __init__(self, device="cuda", model_id="gpt2"):
+    def __init__(self, device=None, model_id="gpt2"):
+        if device is None:
+            device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
         self.device = device
         self.model_id = model_id
         self.model = GPT2LMHeadModel.from_pretrained(model_id).to(device)
