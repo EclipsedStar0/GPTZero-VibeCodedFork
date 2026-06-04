@@ -77,11 +77,17 @@ class GPT2PPL:
                 line = line[:-1]
             ppl = self.getPPL(line)
             Perplexity_per_line.append(ppl)
-        print(f"Perplexity per line {sum(Perplexity_per_line)/len(Perplexity_per_line)}")
-        results["Perplexity per line"] = sum(Perplexity_per_line)/len(Perplexity_per_line)
 
-        print(f"Burstiness {max(Perplexity_per_line)}")
-        results["Burstiness"] = max(Perplexity_per_line)
+        if len(Perplexity_per_line) > 0:
+            avg_per_line = sum(Perplexity_per_line)/len(Perplexity_per_line)
+            max_per_line = max(Perplexity_per_line)
+            print(f"Perplexity per line {avg_per_line}")
+            results["Perplexity per line"] = avg_per_line
+            print(f"Burstiness {max_per_line}")
+            results["Burstiness"] = max_per_line
+        else:
+            results["Perplexity per line"] = 0
+            results["Burstiness"] = 0
 
         out, label = self.getResults(results["Perplexity per line"])
         results["label"] = label
