@@ -7,27 +7,36 @@ Both this code and the orignal code are published under the MIT license.
 by Burhan Ul tayyab and Nicholas Chua
 """
 
+from contextlib import asynccontextmanager
 import logging
 from typing import Optional, Tuple, Any
-from torch import equal
-from model import GPT2PPL
 from fastapi import FastAPI, Form, Request, HTTPException
 import gradio as gr
 import uvicorn
 from database import DB
 from HTML_MD_Components import noticeBoardMarkDown, bannerHTML, emailHTML, discordHTML
 from config import settings
-from HTML_MD_Components import noticeBoardMarkDown, bannerHTML, emailHTML, discordHTML
+from model import GPT2PPL
 
 logger = logging.getLogger(__name__)
 
 CUSTOM_PATH: str = "/"
 
-app: FastAPI = FastAPI()
+model: Optional[GPT2PPL] = None
+database: Optional[DB] = None
 
-# initialize the model
-model: GPT2PPL = GPT2PPL()
-database: DB = DB()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global model, database
+    if model is None:
+        model = GPT2PPL()
+    if database is None:
+        database = DB()
+    yield
+    model = None
+    database = None
+
+app: FastAPI = FastAPI(lifespan=lifespan)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):

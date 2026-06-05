@@ -19,9 +19,10 @@ from config import settings
 
 logger = logging.getLogger(__name__)
 
-
 class GPT2PPL:
     def __init__(self, device: Optional[torch.device] = None) -> None:
+        if hasattr(self, "model"):
+            return
         if device is None:
             device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
         self.device: torch.device = device
