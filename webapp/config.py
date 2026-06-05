@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     reload: bool = True
+    human_text_file: Optional[str] = "calibration_data/HUMAN_TEXT.txt"
+    ai_text_file: Optional[str] = "calibration_data/LLM_TEXT.txt"
 
 
 settings = Settings()
