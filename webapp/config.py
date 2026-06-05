@@ -10,7 +10,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    model_id: str = "gpt2"
+    model_id: str = "Qwen/Qwen3.5-0.8B-Base"
     low_threshold: int = 60
     high_threshold: int = 80
     stride: int = 512

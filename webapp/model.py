@@ -19,7 +19,7 @@ import os
 import torch
 import re
 import nltk
-from transformers import GPT2LMHeadModel, GPT2TokenizerFast
+from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedTokenizerFast
 from collections import OrderedDict
 from typing import Tuple, Dict, Union, Optional, List
 from pathlib import Path
@@ -27,6 +27,17 @@ from pathlib import Path
 from config import settings
 
 logger = logging.getLogger(__name__)
+
+def get_max_seq_length(model):
+    # Try common attribute names in order of likelihood
+    attrs = ['max_position_embeddings', 'n_positions', 'max_seq_length']
+    
+    for attr in attrs:
+        if hasattr(model.config, attr):
+            return getattr(model.config, attr)
+    
+    # If none found, return None or raise an error
+    return None
 
 class GPT2PPL:
     def __init__(self, device: Optional[torch.device] = None) -> None:
@@ -36,10 +47,17 @@ class GPT2PPL:
             device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
         self.device: torch.device = device
         self.model_id: str = settings.model_id
-        self.model: GPT2LMHeadModel = GPT2LMHeadModel.from_pretrained(settings.model_id).to(device)
-        self.tokenizer: GPT2TokenizerFast = GPT2TokenizerFast.from_pretrained(settings.model_id)
-
-        self.max_length: int = settings.max_length or self.model.config.n_positions
+        
+        self.tokenizer = AutoTokenizer.from_pretrained(settings.model_id)
+        if not isinstance(self.tokenizer, PreTrainedTokenizerFast):
+            self.tokenizer = AutoTokenizer.from_pretrained(settings.model_id, use_fast=True)
+        
+        self.model = AutoModelForCausalLM.from_pretrained(
+            settings.model_id, 
+            torch_dtype=torch.float16
+        ).to(device)
+        
+        self.max_length: int = settings.max_length or get_max_seq_length(self.model)
         self.stride: int = settings.stride
         self.low_threshold: int = settings.low_threshold
         self.high_threshold: int = settings.high_threshold
@@ -212,7 +230,7 @@ class GPT2PPL:
         return results, out
 
     def getPPL(self, sentence: str) -> int:
-        encodings: GPT2TokenizerFast.BatchEncoding = self.tokenizer(sentence, return_tensors="pt")
+        encodings =  self.tokenizer(sentence, return_tensors="pt", truncation=True, max_length=self.max_length)
         seq_len: int = encodings.input_ids.size(1)
 
         nlls: List[torch.Tensor] = []
