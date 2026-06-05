@@ -11,7 +11,7 @@ import logging
 from typing import Optional, Tuple, Any
 from torch import equal
 from model import GPT2PPL
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, Request, HTTPException
 import gradio as gr
 import uvicorn
 from database import DB
@@ -38,18 +38,37 @@ async def log_requests(request: Request, call_next):
 
 @app.post("/postdb")
 def uploadDataBase(email: str = Form(), request: Request = None) -> str:
-    logger.info("Database upload request from IP: %s", request.client.host if request.client else "unknown")
-    database.set(request.client.host, email)
-    return "Email Sent"
+    ip = request.client.host if request and request.client else "unknown"
+    logger.info("Database upload request from IP: %s", ip)
+    try:
+        database.set(ip, email)
+        return "Email Sent"
+    except Exception as e:
+        logger.error("Database upload failed: %s", str(e))
+        raise HTTPException(status_code=500, detail="Failed to save email.")
 
 def inference(sentence: str) -> Any:
     logger.info("Inference request received, text length: %d", len(sentence))
-    return model(sentence=sentence)
+    try:
+        if not sentence or not sentence.strip():
+            return {"error": "Input text is empty or invalid."}, "Please provide valid text input."
+        return model(sentence=sentence)
+    except Exception as e:
+        logger.error("Inference error: %s", str(e))
+        return {"error": "An error occurred during analysis.", "details": str(e)}, "Error: Unable to process the request."
 
 @app.get("/infer")
-def infer(sentence: str) -> Any:
+def infer(sentence: Optional[str] = None) -> Any:
+    if not sentence:
+        raise HTTPException(status_code=400, detail="Missing required parameter: sentence")
+    if not sentence.strip():
+        raise HTTPException(status_code=400, detail="Input text cannot be empty")
     logger.info("API inference request received, text length: %d", len(sentence))
-    return model(sentence=sentence)
+    try:
+        return model(sentence=sentence)
+    except Exception as e:
+        logger.error("API inference error: %s", str(e))
+        raise HTTPException(status_code=500, detail="An error occurred during analysis.")
 
 with gr.Blocks(title="SG-GPTZero") as io:
     with gr.Row():

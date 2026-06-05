@@ -57,33 +57,55 @@ class GPT2PPL:
         """
         results: OrderedDict = OrderedDict()
 
-        total_valid_char = re.findall("[a-zA-Z0-9]+", sentence)
-        total_valid_char = sum([len(x) for x in total_valid_char]) # finds len of all the valid characters a sentence
+        if not sentence or not isinstance(sentence, str):
+            return {"error": "Invalid input: sentence must be a non-empty string."}, "Invalid input"
 
-        fake_token_count: float = total_valid_char * settings.char_to_token_ratio
+        try:
+            total_valid_char: List[str] = re.findall("[a-zA-Z0-9]+", sentence)
+            total_char_cnt: int = sum([len(x) for x in total_valid_char])
+        except re.error as e:
+            logger.error("Regex error: %s", str(e))
+            return {"error": "Error processing input text."}, "Error processing input text."
+
+        fake_token_count: float = total_char_cnt * settings.char_to_token_ratio
         
         if fake_token_count < settings.minimum_tokens:
             return {"status": f"Please input more text (min {settings.minimum_tokens} tokens, current: {int(fake_token_count)})"}, f"Please input more text (min {settings.minimum_tokens} tokens, current: {int(fake_token_count)})"
 
-        lines: List[str] = nltk.sent_tokenize(sentence)
+        lines: List[str] = []
+        try:
+            lines = nltk.sent_tokenize(sentence)
+        except Exception as e:
+            logger.error("NLTK tokenization error: %s", str(e))
+            lines = sentence.split(".")
+
         lines = [line.strip() for line in lines if line.strip()]
 
-        ppl: int = self.getPPL(sentence)
+        try:
+            ppl: int = self.getPPL(sentence)
+        except Exception as e:
+            logger.error("Error computing perplexity: %s", str(e))
+            ppl: int = 0
+
         logger.debug("Perplexity %d", ppl)
         results["Perplexity"] = ppl
 
         offset: str = ""
         Perplexity_per_line: List[int] = []
         for i, line in enumerate(lines):
-            if re.search("[a-zA-Z0-9]+", line) == None:
+            if re.search("[a-zA-Z0-9]+", line) is None:
                 continue
             # remove leading/trailing whitespace
             line = line.strip()
-            ppl = self.getPPL(line)
-            Perplexity_per_line.append(ppl)
+            try:
+                ppl = self.getPPL(line)
+                Perplexity_per_line.append(ppl)
+            except Exception as e:
+                logger.warning("Skipping line %d due to error: %s", i, str(e))
+                continue
 
         if len(Perplexity_per_line) > 0:
-            avg_per_line: float = sum(Perplexity_per_line)/len(Perplexity_per_line)
+            avg_per_line: float = sum(Perplexity_per_line) / len(Perplexity_per_line)
             max_per_line: int = max(Perplexity_per_line)
             logger.debug("Perplexity per line %.2f", avg_per_line)
             results["Perplexity per line"] = avg_per_line
@@ -93,15 +115,19 @@ class GPT2PPL:
             results["Perplexity per line"] = 0
             results["Burstiness"] = 0
 
-        out: str
-        label: int
-        out, label = self.getResults(results["Perplexity per line"])
+        out: str = ""
+        label: int = 0
+        try:
+            out, label = self.getResults(results["Perplexity per line"])
+        except Exception as e:
+            logger.error("Error getting results: %s", str(e))
+            out = "Error determining result"
         results["label"] = label
 
         return results, out
 
     def getPPL(self, sentence: str) -> int:
-        encodings = self.tokenizer(sentence, return_tensors="pt")
+        encodings: GPT2TokenizerFast.BatchEncoding = self.tokenizer(sentence, return_tensors="pt")
         seq_len: int = encodings.input_ids.size(1)
 
         nlls: List[torch.Tensor] = []
