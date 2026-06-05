@@ -7,8 +7,17 @@ Both this code and the orignal code are published under the MIT license.
 by Burhan Ul tayyab and Nicholas Chua
 """
 
-from contextlib import asynccontextmanager
 import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+uvicorn_access = logging.getLogger("uvicorn.access")
+uvicorn_access.disabled = True
+
+
+from contextlib import asynccontextmanager
 from typing import Optional, Tuple, Any
 from fastapi import FastAPI, Form, Request, HTTPException
 import gradio as gr

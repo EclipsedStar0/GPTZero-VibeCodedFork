@@ -8,6 +8,12 @@ by Burhan Ul tayyab and Nicholas Chua
 """
 
 import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
 import math
 import os
 import torch
