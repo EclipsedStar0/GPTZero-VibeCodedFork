@@ -15,6 +15,8 @@ import gradio as gr
 import uvicorn
 from database import DB
 from HTML_MD_Components import noticeBoardMarkDown, bannerHTML, emailHTML, discordHTML
+from config import settings
+from HTML_MD_Components import noticeBoardMarkDown, bannerHTML, emailHTML, discordHTML
 
 CUSTOM_PATH: str = "/"
 
@@ -75,4 +77,4 @@ with gr.Blocks(title="SG-GPTZero") as io:
 app = gr.mount_gradio_app(app, io, path=CUSTOM_PATH)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, forwarded_allow_ips="*", proxy_headers=True)
+    uvicorn.run("main:app", host=settings.host, port=settings.port, reload=settings.reload, forwarded_allow_ips="*", proxy_headers=True)

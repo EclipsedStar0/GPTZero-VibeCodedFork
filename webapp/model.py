@@ -14,21 +14,22 @@ from transformers import GPT2LMHeadModel, GPT2TokenizerFast
 from collections import OrderedDict
 from typing import Tuple, Dict, Union, Optional, List
 
+from config import settings
+
 
 class GPT2PPL:
-    def __init__(self, device: Optional[torch.device] = None, model_id: str = "gpt2", 
-                 low_threshold: int = 60, high_threshold: int = 80) -> None:
+    def __init__(self, device: Optional[torch.device] = None) -> None:
         if device is None:
             device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
         self.device: torch.device = device
-        self.model_id: str = model_id
-        self.model: GPT2LMHeadModel = GPT2LMHeadModel.from_pretrained(model_id).to(device)
-        self.tokenizer: GPT2TokenizerFast = GPT2TokenizerFast.from_pretrained(model_id)
+        self.model_id: str = settings.model_id
+        self.model: GPT2LMHeadModel = GPT2LMHeadModel.from_pretrained(settings.model_id).to(device)
+        self.tokenizer: GPT2TokenizerFast = GPT2TokenizerFast.from_pretrained(settings.model_id)
 
-        self.max_length: int = self.model.config.n_positions
-        self.stride: int = 512
-        self.low_threshold: int = low_threshold
-        self.high_threshold: int = high_threshold
+        self.max_length: int = settings.max_length or self.model.config.n_positions
+        self.stride: int = settings.stride
+        self.low_threshold: int = settings.low_threshold
+        self.high_threshold: int = settings.high_threshold
         
     def getResults(self, threshold: float) -> Tuple[str, int]:
         if threshold < self.low_threshold:
@@ -56,16 +57,11 @@ class GPT2PPL:
         total_valid_char = re.findall("[a-zA-Z0-9]+", sentence)
         total_valid_char = sum([len(x) for x in total_valid_char]) # finds len of all the valid characters a sentence
 
-        MINIMUM_TOKENS: int = 32
-        CHAR_TO_TOKEN_RATIO: float = 0.3
+        fake_token_count: float = total_valid_char * settings.char_to_token_ratio
         
-        # Because any half-way decent Byte-Pair Encoding Tokenizer is going to compress text to at least this much, if not a bit more.
-        fake_token_count: float = total_valid_char * CHAR_TO_TOKEN_RATIO 
-        
-        # Change the limit to be at least 32 'tokens' to keep with the prior limit
-        if fake_token_count < MINIMUM_TOKENS:
-            return {"status": f"Please input more text (min {MINIMUM_TOKENS} tokens, current: {int(fake_token_count)})"}, f"Please input more text (min {MINIMUM_TOKENS} tokens, current: {int(fake_token_count)})"
-        
+        if fake_token_count < settings.minimum_tokens:
+            return {"status": f"Please input more text (min {settings.minimum_tokens} tokens, current: {int(fake_token_count)})"}, f"Please input more text (min {settings.minimum_tokens} tokens, current: {int(fake_token_count)})"
+
         lines: List[str] = nltk.sent_tokenize(sentence)
         lines = [line.strip() for line in lines if line.strip()]
 
