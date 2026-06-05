@@ -7,6 +7,7 @@ Both this code and the orignal code are published under the MIT license.
 by Burhan Ul tayyab and Nicholas Chua
 """
 
+import logging
 import torch
 import re
 import nltk
@@ -15,6 +16,8 @@ from collections import OrderedDict
 from typing import Tuple, Dict, Union, Optional, List
 
 from config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class GPT2PPL:
@@ -66,7 +69,7 @@ class GPT2PPL:
         lines = [line.strip() for line in lines if line.strip()]
 
         ppl: int = self.getPPL(sentence)
-        print(f"Perplexity {ppl}")
+        logger.debug("Perplexity %d", ppl)
         results["Perplexity"] = ppl
 
         offset: str = ""
@@ -82,9 +85,9 @@ class GPT2PPL:
         if len(Perplexity_per_line) > 0:
             avg_per_line: float = sum(Perplexity_per_line)/len(Perplexity_per_line)
             max_per_line: int = max(Perplexity_per_line)
-            print(f"Perplexity per line {avg_per_line:.2f}")
+            logger.debug("Perplexity per line %.2f", avg_per_line)
             results["Perplexity per line"] = avg_per_line
-            print(f"Burstiness {max_per_line}")
+            logger.debug("Burstiness %d", max_per_line)
             results["Burstiness"] = max_per_line
         else:
             results["Perplexity per line"] = 0

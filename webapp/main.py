@@ -7,6 +7,7 @@ Both this code and the orignal code are published under the MIT license.
 by Burhan Ul tayyab and Nicholas Chua
 """
 
+import logging
 from typing import Optional, Tuple, Any
 from torch import equal
 from model import GPT2PPL
@@ -18,6 +19,8 @@ from HTML_MD_Components import noticeBoardMarkDown, bannerHTML, emailHTML, disco
 from config import settings
 from HTML_MD_Components import noticeBoardMarkDown, bannerHTML, emailHTML, discordHTML
 
+logger = logging.getLogger(__name__)
+
 CUSTOM_PATH: str = "/"
 
 app: FastAPI = FastAPI()
@@ -26,16 +29,26 @@ app: FastAPI = FastAPI()
 model: GPT2PPL = GPT2PPL()
 database: DB = DB()
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info("Request: %s %s", request.method, request.url.path)
+    response = await call_next(request)
+    logger.info("Response: %s %s - Status: %d", request.method, request.url.path, response.status_code)
+    return response
+
 @app.post("/postdb")
 def uploadDataBase(email: str = Form(), request: Request = None) -> str:
+    logger.info("Database upload request from IP: %s", request.client.host if request.client else "unknown")
     database.set(request.client.host, email)
     return "Email Sent"
 
 def inference(sentence: str) -> Any:
+    logger.info("Inference request received, text length: %d", len(sentence))
     return model(sentence=sentence)
 
 @app.get("/infer")
 def infer(sentence: str) -> Any:
+    logger.info("API inference request received, text length: %d", len(sentence))
     return model(sentence=sentence)
 
 with gr.Blocks(title="SG-GPTZero") as io:
