@@ -42,19 +42,19 @@ with gr.Blocks(title="SG-GPTZero") as io:
     with gr.Row():
          gr.HTML(bannerHTML, visible=True)
     with gr.Row():
-        with gr.Column(scale=0.1):
+        with gr.Column(scale=1):
             pass
-        with gr.Column(scale=0.8):
+        with gr.Column(scale=8):
             gr.Markdown('<h1 style="text-align: center;">SG-GPTZero <a style="text-decoration:none" href="https://github.com/BurhanUlTayyab/GPTZero">(Code)</a></h1>')
-        with gr.Column(scale=0.1, elem_id="discord"):
+        with gr.Column(scale=1, elem_id="discord"):
             gr.HTML(discordHTML, visible=True)
     with gr.Row():
         gr.Markdown("Use SG-GPTZero to determine if the text is written by AI or Human.")
     with gr.Row(elem_id="row1"):
-        with gr.Column(scale=1):
+        with gr.Column(scale=10):
             InputTextBox: gr.Textbox = gr.Textbox(lines=7, placeholder="Please Insert your text(s) here", label="Texts")
             sumbit_btn: gr.Button = gr.Button("Submit", elem_id="submit")
-        with gr.Column(scale=1):
+        with gr.Column(scale=10):
             OutputLabels: gr.JSON = gr.JSON(label="Output")
             OutputTextBox: gr.Textbox = gr.Textbox(show_label=False)
         sumbit_btn.click(inference, inputs=InputTextBox, outputs=[OutputLabels, OutputTextBox], api_name="infer")
@@ -64,9 +64,9 @@ with gr.Blocks(title="SG-GPTZero") as io:
     with gr.Row():
         gr.Markdown('# <span style="color:#006400">Register</span> here for updates.')
     with gr.Row():
-        with gr.Column(scale=0.5):
+        with gr.Column(scale=5):
             emailTextBox: gr.HTML = gr.HTML(emailHTML)
-        with gr.Column(scale=0.5):
+        with gr.Column(scale=5):
             pass
  
     with gr.Row():
